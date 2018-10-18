@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import utn.frsf.ofa.cursojava.tp.integrador.logica.RecetaLogica;
+import utn.frsf.ofa.cursojava.tp.integrador.modelo.Autor;
 import utn.frsf.ofa.cursojava.tp.integrador.modelo.Ingrediente;
 import utn.frsf.ofa.cursojava.tp.integrador.modelo.Receta;
 
@@ -28,9 +29,9 @@ public class RecetaService {
     private RecetaLogica logica;
     
     public Receta guardar(Receta r){        
-        if(!logica.autorPuedeCrearReceta(r)) throw new RuntimeException("La receta no puede ser creada. El autor creo el maximo de recetas. Verifique los datos"); 
-        if(!logica.puedeAgregarIngredientes(r)) throw new RuntimeException("La receta no puede ser creada. Excede la cantidad maxima de ingredientes"); 
-        if(!logica.costoIngredientesValido(r)) throw new RuntimeException("La receta no puede ser creada. El monto de los ingredientes supera el maximo"); 
+       // if(!logica.autorPuedeCrearReceta(r)) throw new RuntimeException("La receta no puede ser creada. El autor creo el maximo de recetas. Verifique los datos"); 
+       // if(!logica.puedeAgregarIngredientes(r)) throw new RuntimeException("La receta no puede ser creada. Excede la cantidad maxima de ingredientes"); 
+       // if(!logica.costoIngredientesValido(r)) throw new RuntimeException("La receta no puede ser creada. El monto de los ingredientes supera el maximo"); 
         if(r.getId()!=null && r.getId()>0) {
                 return em.merge(r);
         }
@@ -50,8 +51,15 @@ public class RecetaService {
                 .getResultList();
     }
     
-    public List<Receta> busquedaAvanzada(AutorService a, Ingrediente i, Double precioMin, Double precioMax,Date fMin,Date fMax){        
-        return null;
-    }
-
+    public List<Receta> busquedaAvanzada(Autor a, Ingrediente i, Double precioMin, Double precioMax,Date fMin,Date fMax){        
+        return em.createQuery("SELECT r FROM Receta r WHERE r.precio >= :PMINIMO AND r.precio <= :PMAXIMO AND r.fechaCreacion >= :PFMIN AND r.fechaCreacion <= :PFMAX AND (r.autor = :PAUTOR OR :PAUTOR is null)") 
+            .setParameter("PMINIMO", precioMin)
+            .setParameter("PMAXIMO", precioMax) 
+            .setParameter("PFMIN", fMin)    
+            .setParameter("PFMAX", fMax)    
+            .setParameter("PAUTOR", a)
+            .getResultList();      
+    }          
+       
 }
+    

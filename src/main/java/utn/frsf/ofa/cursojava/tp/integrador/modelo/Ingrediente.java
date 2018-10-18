@@ -25,7 +25,7 @@ public class Ingrediente implements Serializable{
     private String descripcion;
     private Double costo;
 
-    // TODO Completar mapeo de relacion
+    @ManyToMany(mappedBy = "ingredientes")
     private List<Receta> usadoEnRecetas;
     
     public Integer getId() {
@@ -55,7 +55,7 @@ public class Ingrediente implements Serializable{
     public List<Receta> getUsadoEnRecetas() {
         return usadoEnRecetas;
     }
-
+    
     public void setUsadoEnRecetas(List<Receta> usadoEnRecetas) {
         this.usadoEnRecetas = usadoEnRecetas;
     }

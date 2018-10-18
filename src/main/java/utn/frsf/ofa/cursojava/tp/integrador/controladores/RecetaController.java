@@ -2,6 +2,7 @@ package utn.frsf.ofa.cursojava.tp.integrador.controladores;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
@@ -24,7 +25,7 @@ import utn.frsf.ofa.cursojava.tp.integrador.servicio.RecetaService;
  * @author mdominguez
  */
 
-// TODO: definir anotacion de ambito 
+@SessionScoped
 @Named("recetaController")
 public class RecetaController implements Serializable {
 
@@ -38,6 +39,16 @@ public class RecetaController implements Serializable {
     private Autor autorSeleccionado;
     private List<Receta> listaRecetas;
 
+        
+    private Double precioMinimo=1.0;
+    private Double precioMaximo=1000.0;
+    private Date fechaDesde = new Date(1,1,1);
+    private Date fechaHasta = new Date();
+    private Autor autorBuscado;
+    private Ingrediente ingredienteBuscado;
+    
+    private int tipoBusqueda;
+        
     private DualListModel<Ingrediente> ingredientesDisponibles;
     
     public Receta getRecetaSeleccionada() {
@@ -65,7 +76,8 @@ public class RecetaController implements Serializable {
         List<Ingrediente> origen = ingredienteSrv.listar();
         List<Ingrediente> destino = new ArrayList<Ingrediente>();
         this.ingredientesDisponibles = new DualListModel<>(origen, destino);        
-    }
+    }       
+    
 
     public DualListModel<Ingrediente> getIngredientesDisponibles() {
         return ingredientesDisponibles;
@@ -75,22 +87,39 @@ public class RecetaController implements Serializable {
         this.ingredientesDisponibles = ingredientesDisponibles;
     }
 
-    public String guardar() {
-        recetaSeleccionada.setIngredientes(this.ingredientesDisponibles.getTarget());
-        // TODO completar el metodo guardar
-        // setear el autor de la receta seleccionada
-        // invocar al metodo qeu guarda la receta
-        this.recetaSeleccionada = null;
-        return null;
+    public Double getPrecioMinimo(){    
+        return precioMinimo;
     }
 
-    public String nuevo() {
-        this.recetaSeleccionada = new Receta();
-        this.recetaSeleccionada.setIngredientes(new ArrayList<>());
-        this.ingredientesDisponibles.setTarget(new ArrayList<Ingrediente>());
-        return null;
+    public void setPrecioMinimo(Double precioMinimo) {
+        this.precioMinimo = precioMinimo;
     }
 
+    public Double getPrecioMaximo() {
+        return precioMaximo;
+    }
+
+    public void setPrecioMaximo(Double precioMaximo) {
+        this.precioMaximo = precioMaximo;
+    }
+    
+    public Date getFechaDesde() {
+        return fechaDesde;
+    }
+
+    public void setFechaDesde(Date fechaDesde) {
+        this.fechaDesde = fechaDesde;
+    }
+
+    public Date getFechaHasta() {
+        return fechaHasta;
+    }
+
+    public void setFechaHasta(Date fechaHasta) {
+        this.fechaHasta = fechaHasta;
+    }
+    
+        
     public Autor getAutorSeleccionado() {
         return autorSeleccionado;
     }
@@ -98,6 +127,53 @@ public class RecetaController implements Serializable {
     public void setAutorSeleccionado(Autor autorSeleccionado) {
         this.autorSeleccionado = autorSeleccionado;
     }
-
     
+    
+    public Autor getAutorBuscado() {
+        return autorBuscado;
+    }
+
+    public void setAutorBuscado(Autor autorBuscado) {
+        this.autorBuscado = autorBuscado;
+    }
+
+    public void setIngredienteBuscado(Ingrediente ingredienteBuscado) {    
+        this.ingredienteBuscado = ingredienteBuscado;
+    }
+    
+    public Ingrediente getIngredienteBuscado() {
+        return ingredienteBuscado;
+    }
+    
+    public int getTipoBusqueda() {
+        return tipoBusqueda;
+    }
+
+    public void setTipoBusqueda(int tipoBusqueda) {
+        this.tipoBusqueda = tipoBusqueda;
+    }
+    
+       
+    
+    public String guardar() {
+        recetaSeleccionada.setIngredientes(this.ingredientesDisponibles.getTarget());  
+        recetaSeleccionada.setAutor(autorSeleccionado);
+        Receta tmp = this.recetaSrv.guardar(recetaSeleccionada);
+        this.listaRecetas.add(tmp);                
+        this.recetaSeleccionada = null;
+        return null;
+    }
+    
+    
+    public String nuevo() {
+        this.recetaSeleccionada = new Receta();
+        this.recetaSeleccionada.setIngredientes(new ArrayList<>());
+        this.ingredientesDisponibles.setTarget(new ArrayList<Ingrediente>());
+        return null;
+    }  
+    
+    public String buscarRecetas() {    
+        this.listaRecetas=this.recetaSrv.busquedaAvanzada(autorBuscado, ingredienteBuscado, precioMinimo, precioMaximo, fechaDesde, fechaHasta);
+        return "buscarReceta";
+    }
 }
